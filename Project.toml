@@ -17,9 +17,9 @@ WannierInterActionBase = "30f46834-f0b0-4c0a-9db1-a1e95031f2fb"
 [compat]
 AbstractFFTs = "1"
 FFTW = "1"
-Interpolations = ">=0.16, <1"
+Interpolations = "0.16"
 LoggingExtras = "1"
-WannierInterActionBase = ">=0.2, <1"
+WannierInterActionBase = "0.2"
 julia = "^1.6.7"
 
 [extras]
