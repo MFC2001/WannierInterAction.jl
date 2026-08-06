@@ -2,13 +2,12 @@
 using JLD2
 using WannierInterAction
 
+# For low-dimensional system, you need to specify `period`.
 period = [1, 1, 0]
 cell = read("./POSCAR", POSCAR; period)
 orbital_cell = Cell(cell.lattice, [[2/3, 1/3, 1/2]], "R"; name = ["C"], period)
 # 1:up, 2:dn.
-atom_orb_index = [
-	[1, 2]
-]
+atom_orb_index = [[1, 2]]
 # shell:2.54, 4.4, 5.07, 6.7, 7.6, 8.8, 9.1, 10.1
 pair = atom2orbpair(orbital_cell, 10.5, atom_orb_index)
 
@@ -25,9 +24,12 @@ write("./wannierup.xsf", wannier[1], wannier90_xsf)
 wannier = realspace(wave_ik_dn; cell)
 write("./wannierdn.xsf", wannier[1], wannier90_xsf)
 
+# BerkeleyGW don't support magnetic system, so we use yambo to calculate the dielectric function.
 eps = read("./from_node31/epsilon", epsmat_yambo)
+# We need to provide wave functions for both spin up and spin down.
 ρk = Rhok(eps, wave_ik_up, wave_ik_dn)
 
+# Use slab truncated Coulomb interaction.
 coulomb = PlaneWaveCoulomb(:slab, ρk)
 int(eps, ρk; coulomb, pair, outfolder = intfolder)
 

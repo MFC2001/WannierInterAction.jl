@@ -20,9 +20,10 @@ intfolder = "./interaction"
 chkdata = read("./wannier/wannier90.chk", wannier90_chk)
 wave_ik = read("./wannier/pwscf.save", chkdata, QE_wannier; period)
 # If we calculate dielectric function by BerkeleyGW:
-eps = read("./epsilon/", epsmat_bgw; have_negq0 = true, negq0file = "./epsilon_negq0/eps0mat.h5")
-# Calculate interaction. The output will be saved in intfolder with jld2 format.
-# This program only need the kgrid size of wanner and dielectric function to be the same.
+# please set `write_vcoul` in epsilon.inp
+eps = read("./epsilon/epsmat.h5", epsmat_bgw)
+# Calculate interaction. The output will be saved in outfolder with jld2 format.
+# This program only need the kgrid size of wannier and dielectric function to be the same.
 ρk = Rhok(eps, wave_ik)
 int(eps, ρk; pair, outfolder = intfolder)
 
@@ -30,18 +31,17 @@ int(eps, ρk; pair, outfolder = intfolder)
 # ρk = Rhok(wave_ik)
 # int(ρk; pair, outfolder = intfolder)
 
-
 # wave_ik can be used to plot the wannier functions in real space.
 # wannierfolder = "./"
 # jldsave(joinpath(wannierfolder, "wannier.jld2"); wannier = wave_ik)
-# wanniers = wannier_realspace(wave_ik; range = (3, 3, 3))
+# wanniers = realspace(wave_ik; cell, range = (3, 3, 3))
 # for iw in eachindex(wanniers)
-# 	write(joinpath(wannierfolder, "wannier_$iw.xsf"), wannier90_xsf; cell, range = (3, 3, 3))
+# 	write(joinpath(wannierfolder, "wannier_$iw.xsf"), wanniers[iw], wannier90_xsf)
 # end
 
 
 #3. Do mirror correction.
-# Here we will obtain optimized parameters for the mirror correction of bare direct interaction, and then use the same parameters for screened direct interaction.
+# Here we will obtain optimized parameters for the mirror correction of bare direct interaction, and then use the same geometric parameters for screened direct interaction.
 kgrid = ρk.qgrid
 lattice = chkdata.lattice
 orblocat = chkdata.wannier_centres
@@ -62,15 +62,15 @@ U_1_mirror = MirrorCorrection(:gauss, U_1["interaction"], kgrid, lattice, orbloc
 	αmat = U_bare_mirror.αmat, ϵ, outfile = joinpath(intfolder, "U_1_mirror.jld2"))
 
 
-#4. You can truncate or filter interaction between pairs.
+#4. You can prune or filter interaction between pairs.
 
 # pair_atol = 1e-3
 # pairint_bare = load(joinpath(intfolder, "pair_bare.jld2"))
-# jldsave(joinpath(intfolder, "pair_truncate", "pair_bare.jld2"); interaction = truncate(pairint_bare, pair_atol))
+# jldsave(joinpath(intfolder, "pair_prune", "pair_bare.jld2"); interaction = prune(pairint_bare, pair_atol))
 # pairint_1 = load(joinpath(intfolder, "pair_1.jld2"))
-# jldsave(joinpath(intfolder, "pair_truncate", "pair_1.jld2"); interaction = truncate(pairint_1, pair_atol))
+# jldsave(joinpath(intfolder, "pair_prune", "pair_1.jld2"); interaction = prune(pairint_1, pair_atol))
 
-# remain_pair = generate_pair(2.5)
+# remain_pair = atom2orbpair(cell, 2.5, atom_orb_index)
 # pairint_bare = load(joinpath(intfolder, "pair_bare.jld2"))
 # jldsave(joinpath(intfolder, "pair_filter", "pair_bare.jld2"); interaction = filter_pair(pairint_bare, remain_pair))
 # pairint_1 = load(joinpath(intfolder, "pair_1.jld2"))

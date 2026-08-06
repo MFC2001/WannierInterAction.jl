@@ -2,11 +2,11 @@ function _postprocessing_woeps_int(fileformat::Symbol, ρk::Union{Rhok_collinear
 
 	mkpath(outfolder)
 
-	if IJJI ∈ predata.interaction
-		predata.ijji_value_bare ./= ρk.nq
-		predata.ijji_value_bare_head ./= ρk.nq
-		predata.ijji_value_bare_head_mpc ./= ρk.nq
-		_postprocessing_woeps_ijji(Val(fileformat), outfolder, predata)
+	if DIRECT ∈ predata.interaction
+		predata.direct_value_bare ./= ρk.nq
+		predata.direct_value_bare_head ./= ρk.nq
+		predata.direct_value_bare_head_mpc ./= ρk.nq
+		_postprocessing_woeps_direct(Val(fileformat), outfolder, predata)
 	end
 	if PAIR ∈ predata.interaction
 		predata.pair_value_bare ./= ρk.nq
@@ -22,16 +22,16 @@ function _postprocessing_wieps_int(fileformat::Symbol, ρk::Union{Rhok_collinear
 	# e^2/NΩϵ₀
 	coff = 1000 * qₑ / (ρk.nq * ρk.Ω * ϵ₀)
 
-	if IJJI ∈ predata.interaction
-		predata.ijji_value_bare ./= ρk.nq
-		predata.ijji_value_bare_head ./= ρk.nq
-		predata.ijji_value_bare_head_mpc ./= ρk.nq
-		_postprocessing_woeps_ijji(Val(fileformat), outfolder, predata)
-		predata.ijji_value ./= ρk.nq
-		predata.ijji_value_head ./= ρk.nq
-		predata.ijji_value_head_mpc ./= ρk.nq
-		predata.ijji_value_wing_mpc ./= ρk.nq
-		_postprocessing_wieps_ijji(Val(fileformat), outfolder, predata)
+	if DIRECT ∈ predata.interaction
+		predata.direct_value_bare ./= ρk.nq
+		predata.direct_value_bare_head ./= ρk.nq
+		predata.direct_value_bare_head_mpc ./= ρk.nq
+		_postprocessing_woeps_direct(Val(fileformat), outfolder, predata)
+		predata.direct_value ./= ρk.nq
+		predata.direct_value_head ./= ρk.nq
+		predata.direct_value_head_mpc ./= ρk.nq
+		predata.direct_value_wing_mpc ./= ρk.nq
+		_postprocessing_wieps_direct(Val(fileformat), outfolder, predata)
 	end
 	if PAIR ∈ predata.interaction
 		predata.pair_value_bare ./= ρk.nq

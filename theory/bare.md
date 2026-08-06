@@ -236,42 +236,15 @@ $$
 多极修正有可能是对的，镜像修正的头项处理有些问题，最好把相位因子也展开，可以得到类似于多极修正的结果，二者或许可以相互抵消！
 但是，LiF的测试也表明即使完整计入多极修正，结果仍然存在偏移，说明激子能级偏差中mpc至少不是主要贡献。
 
+### note
+
+根据LiF的激子结果，wannier basis的局域性对pair的影响很大，从而导致激子能级的偏移，但是对色散关系影响不大。
+根据目前进行wannier拟合的经验，轨道成分过于复杂(常常涉及到解纠缠)会导致拟合出的wannier functions存在长程尾巴，
+即使spread很小，通过hopping项可以观察到wannier functions存在长程尾巴。
+已经测试过使用wannierberri对LiF进行对称性限制下的wannier拟合(sp3_p and sp3d2_p)，结果表明仍然存在长程尾巴，
+说明对称性限制对于压制wannier functions的长程尾巴没有效果。
+并且hopping项中存在较小的虚部，这可能是对称性限制下的算法不是十分稳定，没有对虚部进行限制。
+
 ## notation
 
-### U
-
-$$
-U_{i0,jR} = \left\langle i0;jR \left| V \right| jR;i0 \right\rangle 
-= \frac{1}{N} \sum_{q} e^{-iqR} 
-\sum_{G} \rho_{V}^{*}(G, 0, i, i, q) \rho_{V}^{}(G, 0, j, j, q) 
-$$
-
-### ijij
-
-$$
-J^{1}_{i0,jR} = \left\langle i0;jR \left| V \right| i0;jR \right\rangle 
-= \frac{1}{N} \sum_{q} \sum_{G}
-\rho_{V}^{*}(G, R, j, i, q) \rho_{V}^{}(G, R, j, i, q) 
-$$
-
-### iijj
-
-$$
-J^{2}_{i0,jR} = \left\langle i0;i0 \left| V \right| jR;jR \right\rangle 
-= \frac{1}{N} \sum_{q} e^{-iqR} 
-\sum_{G} \rho_{V}^{*}(G, R, j, i, q) \rho_{V}^{}(G, -R, i, j, q) 
-$$
-
-### pair
-
-$$
-(p_1, 0) = (i0, lR_1) \\
-(p_2, R) = (kR, jR+R_2)
-$$
-
-$$
-\left\langle i0;jR+R_2 \left| V \right| kR;lR_1 \right\rangle 
-= \left\langle p_1, 0\left| V \right| p_2, R \right\rangle 
-= \frac{1}{N} \sum_{q} e^{-iqR} 
-\sum_{G} \rho_{V}^{*}(G, R_1, l, i, q) \rho_{V}^{}(G, R_2, j, k, q) 
-$$
+see more details in WannierExcitonModel-theory.

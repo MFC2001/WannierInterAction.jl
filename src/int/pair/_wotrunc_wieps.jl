@@ -1,8 +1,8 @@
 @inbounds function _wotrunc_wieps_q0_pair(::Val{false}, predata, ρR_eps, ρR_eps_mul, q̂₀, G0idx_q0, iω, eps00, epsG0, weight)
 	Threads.@threads for ichunk in Base.OneTo(predata.JuliaTask_nchunk_int)
-		for (ip1, ip2, Ridx_left, li, Ridx_right, jk) in predata.pair_idx_chunk[ichunk]
-			ρR_eps_left = view(ρR_eps, :, Ridx_left, li)
-			ρR_eps_right = view(ρR_eps_mul, :, Ridx_right, jk)
+		for (ip1, ip2, R31, ki, R24, jl) in predata.pair_idx_chunk[ichunk]
+			ρR_eps_left = view(ρR_eps, :, R31, ki)
+			ρR_eps_right = view(ρR_eps_mul, :, R24, jl)
 			predata.pair_value_iq[ip1, ip2] = (predata.pair_value_bare_iq[ip1, ip2] + ρR_eps_left ⋅ ρR_eps_right) * weight
 		end
 	end
@@ -15,13 +15,13 @@ end
 @inbounds function _wotrunc_wieps_q0_pair(::Val{true}, predata, ρR_eps, ρR_eps_mul, q̂₀, G0idx_q0, iω, eps00, epsG0, weight)
 	invϵ = eps00 + 1
 	Threads.@threads for ichunk in Base.OneTo(predata.JuliaTask_nchunk_int)
-		for (ip1, ip2, Ridx_left, li, Ridx_right, jk) in predata.pair_idx_chunk[ichunk]
-			ρR_eps_left = view(ρR_eps, :, Ridx_left, li)
-			ρR_eps_right = view(ρR_eps_mul, :, Ridx_right, jk)
+		for (ip1, ip2, R31, ki, R24, jl) in predata.pair_idx_chunk[ichunk]
+			ρR_eps_left = view(ρR_eps, :, R31, ki)
+			ρR_eps_right = view(ρR_eps_mul, :, R24, jl)
 			wing_left_sumG = ρR_eps_left ⋅ epsG0
 			wing_right_sumG = ρR_eps_right[G0idx_q0]
-			AR_left = view(predata.AR, :, Ridx_left, li)
-			AR_right = view(predata.AR, :, Ridx_right, jk)
+			AR_left = view(predata.AR, :, R31, ki)
+			AR_right = view(predata.AR, :, R24, jl)
 			wing_mpc = _wing_mpc_cal(Val(predata.wingaverage), predata.wing_mpc_coff,
 				AR_left, AR_right, wing_left_sumG, wing_right_sumG, q̂₀)
 			predata.pair_value_head_mpc[ip1, ip2, iω] += predata.pair_value_bare_head_mpc[ip1, ip2] * invϵ * weight
@@ -37,9 +37,9 @@ end
 end
 @inbounds function _wieps_not_q0_pair(predata, ρR_eps, ρR_eps_mul, q, iω)
 	Threads.@threads for ichunk in Base.OneTo(predata.JuliaTask_nchunk_int)
-		for (ip1, ip2, Ridx_left, li, Ridx_right, jk) in predata.pair_idx_chunk[ichunk]
-			ρR_eps_left = view(ρR_eps, :, Ridx_left, li)
-			ρR_eps_right = view(ρR_eps_mul, :, Ridx_right, jk)
+		for (ip1, ip2, R31, ki, R24, jl) in predata.pair_idx_chunk[ichunk]
+			ρR_eps_left = view(ρR_eps, :, R31, ki)
+			ρR_eps_right = view(ρR_eps_mul, :, R24, jl)
 			predata.pair_value_iq[ip1, ip2] = predata.pair_value_bare_iq[ip1, ip2] + ρR_eps_left ⋅ ρR_eps_right
 		end
 	end

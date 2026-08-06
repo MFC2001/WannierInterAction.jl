@@ -1,7 +1,7 @@
 name = "WannierInterAction"
 uuid = "1285c333-b1c3-4218-990c-045f0fa40878"
 authors = ["FanchenMeng <mengfc011220@gmail.com> and contributors"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 AbstractFFTs = "621f4979-c628-5d54-868e-fcf4e3e8185c"

@@ -50,7 +50,7 @@ function MultipoleCorrection(
 	weights = Matrix{Float64}(undef, nntot, nk)
 	for ik in 1:nk
 		# 这个计算很轻量，一般在1s内。
-		weights[:, ik] = _blist_to_shell_weights(blists[:, ik]; shell_tol, orth_tol)
+		weights[:, ik] = WannierInterActionBase._blist_to_shell_weights(blists[:, ik]; shell_tol, orth_tol)
 	end
 
 	return MultipoleCorrection(M, nnkp.kpoints, blists, weights; kwargs...)

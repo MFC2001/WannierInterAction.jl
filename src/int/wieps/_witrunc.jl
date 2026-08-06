@@ -25,9 +25,9 @@ function _witrunc_int(ρk::AbstractRhok{RhoT}, eps::DielectricPWBasis, coulomb, 
 				BLAS.set_num_threads(predata.BLAS_nthread_epsilon)
 				mul!(ρR_eps_mul_mat, epsmat, ρR_eps_mat)
 				BLAS.set_num_threads(1)
-				IJJI ∈ predata.interaction && _witrunc_wieps_q0_ijji(predata, ρR_eps, ρR_eps_mul, iω, head[iω], weight)
-				IJIJ ∈ predata.interaction && _witrunc_wieps_q0_ijij(predata, ρR_eps, ρR_eps_mul, iω, weight)
-				IIJJ ∈ predata.interaction && _witrunc_wieps_q0_iijj(predata, ρR_eps, ρR_eps_mul, iω, weight)
+				DIRECT ∈ predata.interaction && _witrunc_wieps_q0_direct(predata, ρR_eps, ρR_eps_mul, iω, head[iω], weight)
+				EXCHANGE ∈ predata.interaction && _witrunc_wieps_q0_exchange1(predata, ρR_eps, ρR_eps_mul, iω, weight)
+				EXCHANGE ∈ predata.interaction && _witrunc_wieps_q0_exchange2(predata, ρR_eps, ρR_eps_mul, iω, weight)
 				PAIR ∈ predata.interaction && _witrunc_wieps_q0_pair(predata, ρR_eps, ρR_eps_mul, iω, weight)
 			end
 		end
@@ -38,9 +38,9 @@ function _witrunc_int(ρk::AbstractRhok{RhoT}, eps::DielectricPWBasis, coulomb, 
 			BLAS.set_num_threads(predata.BLAS_nthread_epsilon)
 			mul!(ρR_eps_mul_mat, epsmat[iω], ρR_eps_mat)
 			BLAS.set_num_threads(1)
-			IJJI ∈ predata.interaction && _wieps_not_q0_ijji(predata, ρR_eps, ρR_eps_mul, q, iω)
-			IJIJ ∈ predata.interaction && _wieps_not_q0_ijij(predata, ρR_eps, ρR_eps_mul, q, iω)
-			IIJJ ∈ predata.interaction && _wieps_not_q0_iijj(predata, ρR_eps, ρR_eps_mul, q, iω)
+			DIRECT ∈ predata.interaction && _wieps_not_q0_direct(predata, ρR_eps, ρR_eps_mul, q, iω)
+			EXCHANGE ∈ predata.interaction && _wieps_not_q0_exchange1(predata, ρR_eps, ρR_eps_mul, q, iω)
+			EXCHANGE ∈ predata.interaction && _wieps_not_q0_exchange2(predata, ρR_eps, ρR_eps_mul, q, iω)
 			PAIR ∈ predata.interaction && _wieps_not_q0_pair(predata, ρR_eps, ρR_eps_mul, q, iω)
 		end
 	end

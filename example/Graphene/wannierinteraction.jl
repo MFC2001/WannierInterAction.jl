@@ -4,8 +4,8 @@ using WannierInterAction
 
 intfolder = "./interaction"
 
-period = [1, 1, 0]
 # For low-dimensional system, you need to specify `period`.
+period = [1, 1, 0]
 cell = read("./POSCAR", POSCAR; period)
 # C1:pz; C2:pz.
 atom_orb_index = [[1], [2]]
@@ -13,7 +13,7 @@ atom_orb_index = [[1], [2]]
 pair = atom2orbpair(cell, 3, atom_orb_index)
 
 chkdata = read("./wannier/wannier90.chk", wannier90_chk)
-wave_ik = read("./wannier/pwscf.save/", chkdata, QE_wannier; period)
+wave_ik = read("./wannier/pwscf.save", chkdata, QE_wannier; period)
 
 ρk = Rhok(wave_ik)
 int(ρk; pair, outfolder = intfolder)

@@ -2,16 +2,10 @@ module WannierInterAction
 
 using WannierInterActionBase
 
-using WannierInterActionBase.SpecialFunctions
-
 using WannierInterActionBase.StaticArrays
 using WannierInterActionBase.StructEquality
 
-using WannierInterActionBase.QuadGK
-using WannierInterActionBase.HCubature
-
 using WannierInterActionBase.JLD2
-using WannierInterActionBase.DelimitedFiles
 
 Base_exports = names(WannierInterActionBase; all = false)
 for sym in Base_exports
