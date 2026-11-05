@@ -1,120 +1,175 @@
 function _postprocessing_woeps_pair(::Val{:txt}, outfolder, predata)
-	pairint = _postprocessing_pair(Val(predata.pair_hermitian_part), predata)
-	write(joinpath(outfolder, "pair_bare.dat"), pairint, WanIntijklR)
+    pairint = _postprocessing_pair(predata.pair_uplo, predata)
+    # write(joinpath(outfolder, "pair_bare.dat"), pairint, WanIntijklR)
+    jldsave(joinpath(outfolder, "pair_bare.jld2");
+        interaction=pairint,
+        head_mpc=predata.pair_value_bare_head_mpc)
 end
 function _postprocessing_wieps_pair(::Val{:txt}, outfolder, predata)
-	nω = size(predata.pair_value, 4)
-	for iω in Base.OneTo(nω)
-		pairint = _postprocessing_pair(Val(predata.pair_hermitian_part), predata, iω)
-		write(joinpath(outfolder, "pair_$iω.dat"), pairint, WanIntijklR)
-	end
+    nω = size(predata.pair_value, 4)
+    for iω in Base.OneTo(nω)
+        pairint = _postprocessing_pair(predata.pair_uplo, predata, iω)
+        # write(joinpath(outfolder, "pair_$iω.dat"), pairint, WanIntijklR)
+        jldsave(joinpath(outfolder, "pair_$iω.jld2");
+            interaction=pairint,
+            head_mpc=predata.pair_value_head_mpc[:, :, iω],
+            wing_mpc=predata.pair_value_wing_mpc[:, :, iω])
+    end
 end
 function _postprocessing_woeps_pair(::Val{:jld2}, outfolder, predata)
-	pairint = _postprocessing_pair(Val(predata.pair_hermitian_part), predata)
-	jldsave(joinpath(outfolder, "pair_bare.jld2");
-		interaction = pairint,
-		head_mpc = predata.pair_value_bare_head_mpc)
+    pairint = _postprocessing_pair(predata.pair_uplo, predata)
+    jldsave(joinpath(outfolder, "pair_bare.jld2");
+        interaction=pairint,
+        head_mpc=predata.pair_value_bare_head_mpc)
 end
 function _postprocessing_wieps_pair(::Val{:jld2}, outfolder, predata)
-	nω = size(predata.pair_value, 4)
-	for iω in Base.OneTo(nω)
-		pairint = _postprocessing_pair(Val(predata.pair_hermitian_part), predata, iω)
-		jldsave(joinpath(outfolder, "pair_$iω.jld2");
-			interaction = pairint,
-			head_mpc = predata.pair_value_head_mpc[:, :, iω],
-			wing_mpc = predata.pair_value_wing_mpc[:, :, iω])
-	end
+    nω = size(predata.pair_value, 4)
+    for iω in Base.OneTo(nω)
+        pairint = _postprocessing_pair(predata.pair_uplo, predata, iω)
+        jldsave(joinpath(outfolder, "pair_$iω.jld2");
+            interaction=pairint,
+            head_mpc=predata.pair_value_head_mpc[:, :, iω],
+            wing_mpc=predata.pair_value_wing_mpc[:, :, iω])
+    end
 end
-_postprocessing_pair(::Val{:all}, predata) =
-	WanIntijklR(predata.pair_value_bare,
-		predata.pair, predata.pair_pR, predata.pair_R;
-		nw = predata.nw, atol = predata.pair_atol,
-		dosort = true, dofilter = true)
-_postprocessing_pair(::uplo, predata) where {uplo <: Union{Val{:U}, Val{:L}}} =
-	WanIntijklR(predata.pair_value_bare,
-		predata.pair_uploidx, predata.pair, predata.pair_pR, predata.pair_R;
-		nw = predata.nw, atol = predata.pair_atol,
-		uplo = predata.pair_hermitian_part, ishermitian = true, dofilter = true,
-	)
-_postprocessing_pair(::Val{:all}, predata, iω) =
-	WanIntijklR(view(predata.pair_value,:,:,:,iω),
-		predata.pair, predata.pair_pR, predata.pair_R;
-		nw = predata.nw, atol = predata.pair_atol,
-		dosort = true, dofilter = true)
-_postprocessing_pair(::uplo, predata, iω) where {uplo <: Union{Val{:U}, Val{:L}}} =
-	WanIntijklR(view(predata.pair_value,:,:,:,iω),
-		predata.pair_uploidx, predata.pair, predata.pair_pR, predata.pair_R;
-		nw = predata.nw, atol = predata.pair_atol,
-		uplo = predata.pair_hermitian_part, ishermitian = true, dofilter = true,
-	)
 
+_postprocessing_pair(uplo::Symbol, predata) =
+    _postprocessing_pair(Val(uplo), predata.pair_value_bare, predata)
+_postprocessing_pair(uplo::Symbol, predata, iω::Integer) =
+    _postprocessing_pair(Val(uplo), view(predata.pair_value, :, :, iω), predata)
+function _postprocessing_pair(::Val{:all}, value::AbstractMatrix{T}, predata) where {T}
 
+    atol2 = predata.pair_atol * predata.pair_atol
+    # count
+    pair_nidx = length(predata.pair_idx)
+    nR = length(predata.pair_R)
+    N = 0
+    @inbounds for iR in Base.OneTo(nR), ipjp in Base.OneTo(pair_nidx)
+        if abs2(value[ipjp, iR]) > atol2
+            N += 1
+        end
+    end
 
-# _postprocessing_pair!(::Val{:U}, pair_value::Array, pair_U_idx, pair_L_idx, pair, pair_R, pair_pR) =
-# 	_postprocessing_pair!(pair_value, pair_U_idx, pair_L_idx, pair, pair_R, pair_pR)
-# _postprocessing_pair!(::Val{:L}, pair_value::Array, pair_U_idx, pair_L_idx, pair, pair_R, pair_pR) =
-# 	_postprocessing_pair!(pair_value, pair_L_idx, pair_U_idx, pair, pair_R, pair_pR)
-# _postprocessing_pair!(::Val{:all}, pair_value::Array, pair_U_idx, pair_L_idx, pair, pair_R, pair_pR) = pair_value
-# function _postprocessing_pair!(pair_value::Array{T, 3}, pair_cal_idx, pair_uncal_idx, pair, pair_R, pair_pR) where {T}
+    ips = Vector{Int}(undef, N)
+    jps = Vector{Int}(undef, N)
+    iRs = Vector{Int}(undef, N)
+    vals = Vector{T}(undef, N)
 
-# 	pR_minus_pR = [R₁ - R₂ for R₁ in pair_pR, R₂ in pair_pR]
-# 	R′ = unique(vec(pR_minus_pR))
-# 	R′_to_idx = Dict{ReducedCoordinates{Int}, Int}(RR => i for (i, RR) in enumerate(R′))
-# 	pR_minus_pR_to_R′ = map(RR->R′_to_idx[RR], pR_minus_pR)
+    n=0
+    for iR in Base.OneTo(nR), ipjp in Base.OneTo(pair_nidx)
+        v = value[ipjp, iR]
+        if abs2(v) > atol2
+            n+=1
+            (ip, jp) = predata.pair_idx[ipjp]
+            ips[n] = ip
+            jps[n] = jp
+            iRs[n] = iR
+            vals[n] = v
+        end
+    end
 
-# 	R_to_idx = Dict{ReducedCoordinates{Int}, Int}(RR => i for (i, RR) in enumerate(pair_R))
-# 	nR = length(pair_R)
-# 	nR′ = length(R′)
-# 	R_add_R′_to_R = Matrix{Int}(undef, nR, nR′)
-# 	for iR′ in Base.OneTo(nR′), iR in Base.OneTo(nR)
-# 		R_add_R′ = pair_R[iR] + R′[iR′]
-# 		R_add_R′_to_R[iR, iR′] = get(R_to_idx, R_add_R′, 0)
-# 	end
+    return PairIntHRFull(ips, jps, iRs, vals, predata.nw,
+        predata.pair, predata.pair_pR, predata.pair_R; ndegen=predata.pair_ndegen,
+        inbound=true, dofilter=true)
+end
+function _postprocessing_pair(::Val{:U}, value::AbstractMatrix{T}, predata) where {T}
 
-# 	for (Ical, Iuncal) in zip(pair_cal_idx, pair_uncal_idx)
-# 		(p₁_c, p₂_c) = Ical
-# 		(p₁, p₂) = Iuncal
-# 		iR′ = pR_minus_pR_to_R′[pair[p₂][3], pair[p₁][3]]
-# 		for iR in Base.OneTo(nR)
-# 			R_add_R′ = R_add_R′_to_R[iR, iR′]
-# 			if !iszero(R_add_R′)
-# 				pair_value[p₁, p₂, iR] = conj(pair_value[p₁_c, p₂_c, R_add_R′])
-# 			end
-# 		end
-# 	end
+    atol2 = predata.pair_atol * predata.pair_atol
+    # count
+    pair_nidx = length(predata.pair_idx)
+    nR = length(predata.pair_R)
+    N = 0
+    @inbounds for iR in Base.OneTo(nR), ipjp in Base.OneTo(pair_nidx)
+        if abs2(value[ipjp, iR]) > atol2
+            N += 1
+        end
+    end
 
-# 	return pair_value
-# end
-# function _postprocessing_pair!(pair_value::Array{T, 4}, pair_cal_idx, pair_uncal_idx, pair, pair_R, pair_pR) where {T}
+    ips = Vector{Int}(undef, N)
+    jps = Vector{Int}(undef, N)
+    iRs = Vector{Int}(undef, N)
+    vals = Vector{T}(undef, N)
 
-# 	pR_minus_pR = [R₁ - R₂ for R₁ in pair_pR, R₂ in pair_pR]
-# 	R′ = unique(vec(pR_minus_pR))
-# 	R′_to_idx = Dict{ReducedCoordinates{Int}, Int}(RR => i for (i, RR) in enumerate(R′))
-# 	pR_minus_pR_to_R′ = map(RR->R′_to_idx[RR], pR_minus_pR)
+    n=0
+    for iR in Base.OneTo(nR), ipjp in Base.OneTo(pair_nidx)
+        v = value[ipjp, iR]
+        if abs2(v) > atol2
+            (ip, jp) = predata.pair_idx[ipjp]
+            if ip == jp
+                _isnegative_vector(predata.pair_R[iR]) && continue
+                n+=1
+                ips[n] = ip
+                jps[n] = ip
+                iRs[n] = iR
+                vals[n] = v
+            else
+                n+=1
+                ips[n] = ip
+                jps[n] = jp
+                iRs[n] = iR
+                vals[n] = v
+            end
+        end
+    end
+    # ip==jp的项存在多余的，mask的计数偏大。
+    resize!(ips, n)
+    resize!(jps, n)
+    resize!(iRs, n)
+    resize!(vals, n)
 
-# 	R_to_idx = Dict{ReducedCoordinates{Int}, Int}(RR => i for (i, RR) in enumerate(pair_R))
-# 	nR = length(pair_R)
-# 	nR′ = length(R′)
-# 	R_add_R′_to_R = Matrix{Int}(undef, nR, nR′)
-# 	for iR′ in Base.OneTo(nR′), iR in Base.OneTo(nR)
-# 		R_add_R′ = pair_R[iR] + R′[iR′]
-# 		R_add_R′_to_R[iR, iR′] = get(R_to_idx, R_add_R′, 0)
-# 	end
+    return PairIntHRHermitian(ips, jps, iRs, vals, predata.nw,
+        predata.pair, predata.pair_pR, predata.pair_R; ndegen=predata.pair_ndegen,
+        inbound=true, dofilter=true, have_negR=true, docheck=false)
+end
+function _postprocessing_pair(::Val{:L}, value::AbstractMatrix{T}, predata) where {T}
 
-# 	nω = size(pair_value, 1)
-# 	for (Ical, Iuncal) in zip(pair_cal_idx, pair_uncal_idx)
-# 		(p₁_c, p₂_c) = Ical
-# 		(p₁, p₂) = Iuncal
-# 		iR′ = pR_minus_pR_to_R′[pair[p₂][3], pair[p₁][3]]
-# 		for iR in Base.OneTo(nR)
-# 			R_add_R′ = R_add_R′_to_R[iR, iR′]
-# 			if !iszero(R_add_R′)
-# 				for iω in Base.OneTo(nω)
-# 					pair_value[iω, p₁, p₂, iR] = conj(pair_value[iω, p₁_c, p₂_c, R_add_R′])
-# 				end
-# 			end
-# 		end
-# 	end
+    R2idx = Dict(RR=>i for (i, RR) in enumerate(predata.pair_R))
+    negR = collect(R2idx[-RR] for RR in predata.pair_R)
 
-# 	return pair_value
-# end
+    atol2 = predata.pair_atol * predata.pair_atol
+    # count
+    pair_nidx = length(predata.pair_idx)
+    nR = length(predata.pair_R)
+    N = 0
+    @inbounds for iR in Base.OneTo(nR), ipjp in Base.OneTo(pair_nidx)
+        if abs2(value[ipjp, iR]) > atol2
+            N += 1
+        end
+    end
+
+    ips = Vector{Int}(undef, N)
+    jps = Vector{Int}(undef, N)
+    iRs = Vector{Int}(undef, N)
+    vals = Vector{T}(undef, N)
+
+    n=0
+    for iR in Base.OneTo(nR), ipjp in Base.OneTo(pair_nidx)
+        v = value[ipjp, iR]
+        if abs2(v) > atol2
+            (ip, jp) = predata.pair_idx[ipjp]
+            if ip == jp
+                _ispositive_vector(predata.pair_R[iR]) && continue
+                n+=1
+                ips[n] = ip
+                jps[n] = ip
+                iRs[n] = negR[iR]
+                vals[n] = conj(v)
+            else
+                n+=1
+                ips[n] = jp
+                jps[n] = ip
+                iRs[n] = negR[iR]
+                vals[n] = conj(v)
+            end
+        end
+    end
+    # ip==jp的项存在多余的，mask的计数偏大。
+    resize!(ips, n)
+    resize!(jps, n)
+    resize!(iRs, n)
+    resize!(vals, n)
+
+    return PairIntHRHermitian(ips, jps, iRs, vals, predata.nw,
+        predata.pair, predata.pair_pR, predata.pair_R; ndegen=predata.pair_ndegen,
+        inbound=true, dofilter=true, have_negR=true, docheck=false)
+end

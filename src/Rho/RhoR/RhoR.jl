@@ -97,7 +97,7 @@ function RhoR(ρk::AbstractRhok{RhoT},
 	fft_grid = ρk.fft_grid
 
 	if nR == 1
-		ρRbuffer == :low
+		ρRbuffer = :low
 	end
 
 	if ρRbuffer == :auto

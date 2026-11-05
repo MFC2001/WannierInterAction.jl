@@ -59,7 +59,7 @@ function RhoR_nGnknij(ρk::AbstractRhok{RhoT},
 
 	# ρk buffer
 	ρk_size = format_memory(sizeof(RhoT) * nG_rho_max * nk * np_ij)
-	println("ρk: $RhoT, dims=($nG_rho_max, $nk, $np_ij), total=$ρk_size")
+	println("ρk_buffer: $RhoT, dims=($nG_rho_max, $nk, $np_ij), total=$ρk_size")
 	# Wave functions (ψk & ψkq)
 	wave_size = format_memory(sizeof(RhoT) * prod(fft_grid))
 	total_size = format_memory(sizeof(RhoT) * prod(fft_grid) * nchunk * 2)

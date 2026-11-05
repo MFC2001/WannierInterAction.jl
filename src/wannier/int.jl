@@ -1,6 +1,10 @@
 """
+	int(w₁::wannier90_xsf{<: Number}, w₂::wannier90_xsf{<: Number}, R = [0, 0, 0])
+	int(w₁::AbstractArray{<:Number, 3}, w₂::AbstractArray{<:Number, 3}, range, lattice, R)
 
 ∫|ψ₁(r₁)|²|ψ₂(r₂)|²1/|r₁ - r₂ - R| dr₁dr₂
+
+!!! unusable!
 """
 function int(w₁::wannier90_xsf{<: Number}, w₂::wannier90_xsf{<: Number}, R = [0, 0, 0])
 	@assert w₁.grid_size == w₂.grid_size "Two wannier functions must be defined on the same grid"
@@ -22,6 +26,7 @@ function int(w₁::wannier90_xsf{<: Number}, w₂::wannier90_xsf{<: Number}, R =
 end
 function int(w₁::AbstractArray{<:Number, 3}, w₂::AbstractArray{<:Number, 3}, range, lattice, R)
 	@assert size(w₁) == size(w₂) "Two wannier functions must be defined on the same grid"
+
 	grid_size = size(w₁)
 	grid_size_uc = Int.(grid_size ./ range)
 

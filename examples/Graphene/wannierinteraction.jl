@@ -16,7 +16,7 @@ chkdata = read("./wannier/wannier90.chk", wannier90_chk)
 wave_ik = read("./wannier/pwscf.save", chkdata, QE_wannier; period)
 
 ρk = Rhok(wave_ik)
-int(ρk; pair, outfolder = intfolder)
+int(ρk; pair, outfolder=intfolder)
 
 kgrid = ρk.qgrid
 lattice = chkdata.lattice
@@ -26,5 +26,5 @@ nk = 15
 rcut = (nk - 1) * 2.13 / 2
 
 U_bare = load(joinpath(intfolder, "U_bare.jld2"))
-U_bare_mirror = MirrorCorrection(:keldysh_gauss_optim, U_bare["interaction"], kgrid, lattice, orblocat; period = cell.period,
-	rcut, outfile = joinpath(intfolder, "U_bare_mirror.jld2"))
+U_bare_mirror = MirrorCorrection(:keldysh_gauss_optim, U_bare["interaction"], kgrid, lattice, orblocat; period=cell.period,
+    rcut, outfile=joinpath(intfolder, "U_bare_mirror.jld2"))

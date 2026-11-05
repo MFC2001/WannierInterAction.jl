@@ -14,8 +14,9 @@ function _preprocessing_int(ρk::Union{Rhok_collinear{RhoT},Rhok_noncollinear{Rh
     ρRlist = Set([ReducedCoordinates{Int}(0, 0, 0)])
 
     if DIRECT ∈ interaction_para.interaction
-        direct_R = gridindex(Val(:WignerSeitz), lattice, qgrid.kgrid_size)
+        direct_R, direct_ndegen = gridindex(Val(:WignerSeitz), lattice, qgrid.kgrid_size; atol=interaction_para.grid_atol)
         direct_nR = length(direct_R)
+        println("Direct: nR = ", direct_nR, ", ndegen_max = ", maximum(direct_ndegen))
         direct_idx = vec([(iw1, iw2) for iw1 in 1:nw, iw2 in 1:nw])
         direct_value_bare = zeros(RhoT, nw, nw, direct_nR)
         direct_value_bare_iq = zeros(RhoT, nw, nw)
@@ -29,6 +30,7 @@ function _preprocessing_int(ρk::Union{Rhok_collinear{RhoT},Rhok_noncollinear{Rh
         ϵ = iszero(nω) ? nothing : zeros(ComplexF64, nω)
     else
         direct_R = nothing
+        direct_ndegen = nothing
         direct_idx = nothing
         direct_value_bare = nothing
         direct_value_bare_iq = nothing
@@ -42,8 +44,9 @@ function _preprocessing_int(ρk::Union{Rhok_collinear{RhoT},Rhok_noncollinear{Rh
         ϵ = nothing
     end
     if PAIR ∈ interaction_para.interaction
-        pair, pair_R, pair_pR, pair_idx =
-            _preprocessing_pair(interaction_para.pair, interaction_para.pair_range, nw, qgrid.kgrid_size, lattice, interaction_para.pair_hermitian_part, upindex, dnindex)
+        pair, pair_pR, pair_isonsite, pair_R, pair_ndegen, pair_idx =
+            _preprocessing_pair(interaction_para.pair, interaction_para.pair_range,
+                nw, lattice, qgrid.kgrid_size, interaction_para.grid_atol, interaction_para.pair_uplo, upindex, dnindex)
 
         pair_ij_add = map(pair) do p
             (p[1], p[2])
@@ -51,29 +54,26 @@ function _preprocessing_int(ρk::Union{Rhok_collinear{RhoT},Rhok_noncollinear{Rh
         union!(pair_ij, pair_ij_add)
         union!(ρRlist, pair_pR)
 
-        pair_isp0 = map(p -> WannierInterActionBase._iszero_pair(p, pair_pR), pair)
-
-        pair_uploidx = pair_idx
         pair_nR = length(pair_R)
         pair_np = length(pair)
+        pair_nidx = length(pair_idx)
 
-        println("pair_np: ", pair_np)
-        println("pair_nR: ", pair_nR)
+        println("Pair: np = ", pair_np, ", nR = ", pair_nR, ", ndegen_max = ", maximum(pair_ndegen))
 
-        pair_value_bare = zeros(RhoT, pair_np, pair_np, pair_nR)
-        pair_value_bare_iq = zeros(RhoT, pair_np, pair_np)
+        pair_value_bare = zeros(RhoT, pair_nidx, pair_nR)
+        pair_value_bare_iq = zeros(RhoT, pair_nidx)
         pair_value_bare_head_mpc = zeros(RhoT, pair_np, pair_np)
-        pair_value = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np, pair_nR, nω)
-        pair_value_iq = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np)
+        pair_value = iszero(nω) ? nothing : zeros(RhoT, pair_nidx, pair_nR, nω)
+        pair_value_iq = iszero(nω) ? nothing : zeros(RhoT, pair_nidx)
         pair_value_head_mpc = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np, nω)
         pair_value_wing_mpc = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np, nω)
     else
         pair = nothing
-        pair_R = nothing
         pair_pR = nothing
+        pair_R = nothing
+        pair_ndegen = nothing
         pair_idx = nothing
-        pair_isp0 = nothing
-        pair_uploidx = nothing
+        pair_isonsite = nothing
         pair_value_bare = nothing
         pair_value_bare_iq = nothing
         pair_value_bare_head_mpc = nothing
@@ -109,14 +109,14 @@ function _preprocessing_int(ρk::Union{Rhok_collinear{RhoT},Rhok_noncollinear{Rh
             iρR = ρRlist_to_idx[pair_pR[ipR]]
             return (iρR, ji)
         end
-        pair_idx = map(pair_idx) do (ip1, ip2)
-            (ρR_left, ji_left) = pair_idx_ρR[ip1]
-            (ρR_right, ji_right) = pair_idx_ρR[ip2]
-            return (ip1, ip2, ρR_left, ji_left, ρR_right, ji_right)
+        pair_idx_chunk = map(eachindex(pair_idx)) do ipjp
+            (ip, jp) = pair_idx[ipjp]
+            (ρR_left, ji_left) = pair_idx_ρR[ip]
+            (ρR_right, ji_right) = pair_idx_ρR[jp]
+            return (ipjp, ρR_left, ji_left, ρR_right, ji_right)
         end
-        pair_idx_chunk = _split_tasks(pair_idx, JuliaTask_nchunk_int)
+        pair_idx_chunk = _split_tasks(pair_idx_chunk, JuliaTask_nchunk_int)
     else
-        pair_idx = nothing
         pair_idx_chunk = nothing
     end
 
@@ -142,19 +142,19 @@ function _preprocessing_int(ρk::Union{Rhok_collinear{RhoT},Rhok_noncollinear{Rh
         havempc=havempc, AR=AR, CR=CR, wingaverage=interaction_para.wingaverage,
         head_mpc_coff=head_mpc_coff, wing_mpc_coff=wing_mpc_coff,
         # direct
-        direct_R=direct_R, direct_idx=direct_idx, direct_idx_chunk=direct_idx_chunk,
+        direct_R=direct_R, direct_ndegen=direct_ndegen, direct_idx=direct_idx, direct_idx_chunk=direct_idx_chunk,
         direct_value_bare=direct_value_bare, direct_value_bare_iq=direct_value_bare_iq,
         direct_value_bare_head=direct_value_bare_head, direct_value_bare_head_mpc=direct_value_bare_head_mpc,
         direct_value=direct_value, direct_value_iq=direct_value_iq, direct_value_head=direct_value_head,
         direct_value_head_mpc=direct_value_head_mpc, direct_value_wing_mpc=direct_value_wing_mpc,
         ϵ=ϵ,
         # pair
-        pair=pair, pair_R=pair_R, pair_pR=pair_pR, pair_isp0=pair_isp0, pair_uploidx=pair_uploidx,
+        pair=pair, pair_pR=pair_pR, pair_R=pair_R, pair_ndegen=pair_ndegen, pair_isonsite=pair_isonsite,
         pair_idx=pair_idx, pair_idx_chunk=pair_idx_chunk,
         pair_value_bare=pair_value_bare, pair_value_bare_iq=pair_value_bare_iq,
         pair_value_bare_head_mpc=pair_value_bare_head_mpc,
         pair_value=pair_value, pair_value_iq=pair_value_iq,
         pair_value_head_mpc=pair_value_head_mpc, pair_value_wing_mpc=pair_value_wing_mpc,
-        pair_atol=interaction_para.pair_atol, pair_hermitian_part=interaction_para.pair_hermitian_part,
+        pair_atol=interaction_para.pair_atol, pair_uplo=interaction_para.pair_uplo,
     )
 end

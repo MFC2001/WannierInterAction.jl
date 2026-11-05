@@ -1,9 +1,9 @@
 function _wotrunc_int(ρk::AbstractRhok{RhoT}, eps::DielectricPWBasis, coulomb, predata, ρR, iq) where {RhoT}
 	_wotrunc_int(ρk, coulomb, predata, ρR, iq)
 	nG_eps_iq = eps.nG[iq]
-	ρR_eps = ρR[1:nG_eps_iq, :, :]
+	ρR_eps = ρR[1:nG_eps_iq, :, :] # an allocate
 	ρR_eps_mat = reshape(ρR_eps, nG_eps_iq, :) # a view
-	ρR_eps_mul = similar(ρR_eps)
+	ρR_eps_mul = similar(ρR_eps) # an allocate
 	ρR_eps_mul_mat = reshape(ρR_eps_mul, nG_eps_iq, :) # a view
 	if iq == ρk.q0_idx
 		G0idx_q0 = ρk.G0idx_q0

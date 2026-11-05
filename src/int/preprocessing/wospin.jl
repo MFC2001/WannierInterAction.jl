@@ -9,8 +9,9 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
     ρRlist = Set([ReducedCoordinates{Int}(0, 0, 0)])
 
     if DIRECT ∈ interaction_para.interaction
-        direct_R = gridindex(Val(:WignerSeitz), lattice, qgrid.kgrid_size)
+        direct_R, direct_ndegen = gridindex(Val(:WignerSeitz), lattice, qgrid.kgrid_size; atol=interaction_para.grid_atol)
         direct_nR = length(direct_R)
+        println("Direct: nR = ", direct_nR, ", ndegen_max = ", maximum(direct_ndegen))
         direct_idx = vec([(iw1, iw2) for iw1 in 1:nw, iw2 in 1:nw])
         direct_value_bare = zeros(RhoT, nw, nw, direct_nR)
         direct_value_bare_iq = zeros(RhoT, nw, nw)
@@ -24,6 +25,7 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
         ϵ = iszero(nω) ? nothing : zeros(ComplexF64, nω)
     else
         direct_R = nothing
+        direct_ndegen = nothing
         direct_idx = nothing
         direct_value_bare = nothing
         direct_value_bare_iq = nothing
@@ -37,24 +39,15 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
         ϵ = nothing
     end
     if EXCHANGE ∈ interaction_para.interaction
-        exchange_R = gridindex(interaction_para.exchange_range)
+        exchange_R, exchange_idx = _preprocessing_exchange(interaction_para.exchange_range, nw, ρk.period)
+
         exchange_nR = length(exchange_R)
+        println("Exchange: nR = ", exchange_nR)
         union!(ρRlist, exchange_R)
         union!(ρRlist, map(R -> -R, exchange_R))
         pair_ij_add = vec([(i, j) for i in 1:nw, j in 1:nw])
         union!(pair_ij, pair_ij_add)
-        exchange_R0idx = findfirst(R -> iszero(R), exchange_R)
-        exchange_idx = [(iw1, iw2, iR) for iw1 in 1:nw, iw2 in 1:nw, iR in 1:exchange_nR]
-        # without U-type interaction
-        if !isnothing(exchange_R0idx)
-            for iw in 1:nw
-                exchange_idx[iw, iw, exchange_R0idx] = (0, 0, 0)
-            end
-            exchange_idx = vec(exchange_idx)
-            filter!(idx -> !any(iszero, idx), exchange_idx)
-        else
-            exchange_idx = vec(exchange_idx)
-        end
+
         exchange1_value_bare = zeros(RhoT, nw, nw, exchange_nR)
         exchange2_value_bare = zeros(RhoT, nw, nw, exchange_nR)
         exchange1_value_bare_iq = zeros(RhoT, nw, nw, exchange_nR)
@@ -84,8 +77,9 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
         exchange2_value_wing_mpc = nothing
     end
     if PAIR ∈ interaction_para.interaction
-        pair, pair_R, pair_pR, pair_idx =
-            _preprocessing_pair(interaction_para.pair, interaction_para.pair_range, nw, qgrid.kgrid_size, lattice, interaction_para.pair_hermitian_part)
+        pair, pair_pR, pair_isonsite, pair_R, pair_ndegen, pair_idx =
+            _preprocessing_pair(interaction_para.pair, interaction_para.pair_range,
+                nw, lattice, qgrid.kgrid_size, interaction_para.grid_atol, interaction_para.pair_uplo)
 
         pair_ij_add = map(pair) do p
             (p[1], p[2])
@@ -93,29 +87,26 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
         union!(pair_ij, pair_ij_add)
         union!(ρRlist, pair_pR)
 
-        pair_isp0 = map(p -> WannierInterActionBase._iszero_pair(p, pair_pR), pair)
-
-        pair_uploidx = pair_idx
         pair_nR = length(pair_R)
         pair_np = length(pair)
+        pair_nidx = length(pair_idx)
 
-        println("pair_np: ", pair_np)
-        println("pair_nR: ", pair_nR)
+        println("Pair: np = ", pair_np, ", nR = ", pair_nR, ", ndegen_max = ", maximum(pair_ndegen))
 
-        pair_value_bare = zeros(RhoT, pair_np, pair_np, pair_nR)
-        pair_value_bare_iq = zeros(RhoT, pair_np, pair_np)
+        pair_value_bare = zeros(RhoT, pair_nidx, pair_nR)
+        pair_value_bare_iq = zeros(RhoT, pair_nidx)
         pair_value_bare_head_mpc = zeros(RhoT, pair_np, pair_np)
-        pair_value = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np, pair_nR, nω)
-        pair_value_iq = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np)
+        pair_value = iszero(nω) ? nothing : zeros(RhoT, pair_nidx, pair_nR, nω)
+        pair_value_iq = iszero(nω) ? nothing : zeros(RhoT, pair_nidx)
         pair_value_head_mpc = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np, nω)
         pair_value_wing_mpc = iszero(nω) ? nothing : zeros(RhoT, pair_np, pair_np, nω)
     else
         pair = nothing
-        pair_R = nothing
         pair_pR = nothing
+        pair_R = nothing
+        pair_ndegen = nothing
         pair_idx = nothing
-        pair_isp0 = nothing
-        pair_uploidx = nothing
+        pair_isonsite = nothing
         pair_value_bare = nothing
         pair_value_bare_iq = nothing
         pair_value_bare_head_mpc = nothing
@@ -175,14 +166,14 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
             iρR = ρRlist_to_idx[pair_pR[ipR]]
             return (iρR, ji)
         end
-        pair_idx = map(pair_idx) do (ip1, ip2)
-            (ρR_left, ji_left) = pair_idx_ρR[ip1]
-            (ρR_right, ji_right) = pair_idx_ρR[ip2]
-            return (ip1, ip2, ρR_left, ji_left, ρR_right, ji_right)
+        pair_idx_chunk = map(eachindex(pair_idx)) do ipjp
+            (ip, jp) = pair_idx[ipjp]
+            (ρR_left, ji_left) = pair_idx_ρR[ip]
+            (ρR_right, ji_right) = pair_idx_ρR[jp]
+            return (ipjp, ρR_left, ji_left, ρR_right, ji_right)
         end
-        pair_idx_chunk = _split_tasks(pair_idx, JuliaTask_nchunk_int)
+        pair_idx_chunk = _split_tasks(pair_idx_chunk, JuliaTask_nchunk_int)
     else
-        pair_idx = nothing
         pair_idx_chunk = nothing
     end
 
@@ -208,7 +199,7 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
         havempc=havempc, AR=AR, CR=CR, wingaverage=interaction_para.wingaverage,
         head_mpc_coff=head_mpc_coff, wing_mpc_coff=wing_mpc_coff,
         # direct
-        direct_R=direct_R, direct_idx=direct_idx, direct_idx_chunk=direct_idx_chunk,
+        direct_R=direct_R, direct_ndegen=direct_ndegen, direct_idx=direct_idx, direct_idx_chunk=direct_idx_chunk,
         direct_value_bare=direct_value_bare, direct_value_bare_iq=direct_value_bare_iq,
         direct_value_bare_head=direct_value_bare_head, direct_value_bare_head_mpc=direct_value_bare_head_mpc,
         direct_value=direct_value, direct_value_iq=direct_value_iq, direct_value_head=direct_value_head,
@@ -225,12 +216,12 @@ function _preprocessing_int(ρk::Rhok_wospin{RhoT}, nω::Integer, interaction_pa
         exchange1_value_head_mpc=exchange1_value_head_mpc, exchange2_value_head_mpc=exchange2_value_head_mpc,
         exchange1_value_wing_mpc=exchange1_value_wing_mpc, exchange2_value_wing_mpc=exchange2_value_wing_mpc,
         # pair
-        pair=pair, pair_R=pair_R, pair_pR=pair_pR, pair_isp0=pair_isp0, pair_uploidx=pair_uploidx,
+        pair=pair, pair_pR=pair_pR, pair_R=pair_R, pair_ndegen=pair_ndegen, pair_isonsite=pair_isonsite,
         pair_idx=pair_idx, pair_idx_chunk=pair_idx_chunk,
         pair_value_bare=pair_value_bare, pair_value_bare_iq=pair_value_bare_iq,
         pair_value_bare_head_mpc=pair_value_bare_head_mpc,
         pair_value=pair_value, pair_value_iq=pair_value_iq,
         pair_value_head_mpc=pair_value_head_mpc, pair_value_wing_mpc=pair_value_wing_mpc,
-        pair_atol=interaction_para.pair_atol, pair_hermitian_part=interaction_para.pair_hermitian_part,
+        pair_atol=interaction_para.pair_atol, pair_uplo=interaction_para.pair_uplo,
     )
 end

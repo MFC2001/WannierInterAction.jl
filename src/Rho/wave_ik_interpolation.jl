@@ -15,14 +15,14 @@ function waveik_interpolation_pre(wave::WannierPWKgrid{WaveT}) where {WaveT}
 	(Glist, Gidx) = merge_Glist(Glists...; rldot = wave.rldot, Gidx = true)
 
 	return WannierPWKgrid{WaveT}(
-		nk, wave.nw, wave.nspin, wave.nG, wave.nG_max, kgrid, Gidx, Glist, wave.components, wave.fft_grid, wave.Gmap,
+		nk, wave.nw, wave.nspinor, wave.nG, wave.nG_max, kgrid, Gidx, Glist, wave.components, wave.fft_grid, wave.Gmap,
 		wave.period, wave.lattice, wave.rlattice, wave.ldot, wave.rldot, wave.Ω, wave.rΩ,
 	)
 end
 function WannierWaveKgridShiftInterpolation(wave::WannierPWKgrid{WaveT}) where {WaveT}
-	if wave.nspin == 1 || wave.nspin == 2
+	if wave.nspinor == 1
 		return WannierWaveKgridShiftInterpolationScalar(wave)
-	elseif wave.nspin == 4
+	elseif wave.nspinor == 2
 		return WannierWaveKgridShiftInterpolationSpinor(wave)
 	else
 		error("Wrong wave!")

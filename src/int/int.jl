@@ -22,6 +22,24 @@ include("./wieps/wieps.jl")
 # 关于FFTW，如果单个FFTW任务过大(2D及以下)，内存带宽成为主要瓶颈，盲目增加线程数可能并不能显著降低计算总时长。
 # FFTW预计会成为主要瓶颈，优化路径为手动进行多次1DFFT来替换完整的3DFFT，如此可以在Julia层级进行更精细的控制，并避免内存带宽的限制。
 # 预计需要使用permutedims!来避免跨步访问，保证FFT进行的始终是连续内存。
+
+# 一个案例，72核，ρR的计算过程中大概只占用了10核左右。
+# 需要将ρk和ρR的计算结合起来，将任务粒度划分更细。
+"""
+    int(ρk::AbstractRhok; kwargs...)
+    int(epsilon::DielectricPWBasis, ρk::AbstractRhok; kwargs...)
+
+- `pair`::Tuple{<:Integer,<:Integer,<:AbstractVector{<:Integer}}
+    A tuple `(i, j, R)` representing a pair formed by the Wannier basis at `i0` and the Wannier basis at `jR`.
+- `pair_uplo`::Symbol = :all
+    Whether to reduce the computational cost by exploiting the Hermiticity of the inter-pair interactions. Supported options are `:all`, `:U`, and `:L`.
+- `pair_atol`::Real = sqrt(eps(Float64))
+    Truncation threshold for the final computed inter-pair interactions. Values below this threshold are discarded and are not saved.
+- `coulomb`
+    Truncated coulomb potential in plane-wave basis, no need to set up for 3D and 2D system, and have to set up for 1D and 0D system.
+
+See also [`Rhok`](@ref), [`PlaneWaveCoulomb`](@ref).
+"""
 function int(ρk::AbstractRhok;
     ρRnchunk::Integer=Threads.nthreads(), ρRbuffer::Symbol=:auto,
     iqidx=:default, fileformat::Symbol=:jld2,
@@ -30,8 +48,8 @@ function int(ρk::AbstractRhok;
     coulomb::Union{PlaneWaveCoulomb,Nothing}=nothing,
     multipolecorrection::Union{AbstractMultipoleCorrection,Nothing}=nothing,
     wingaverage::Bool=true,
-    exchange_range=(3, 3, 3),
-    pair=:default, pair_hermitian_part=:all, pair_range=:default, pair_atol::Real=1e-6,
+    grid_atol::Real=1e-6, exchange_range=(3, 3, 3),
+    pair=:default, pair_uplo=:all, pair_range=:default, pair_atol::Real=sqrt(eps(Float64)),
 )
 
     # logio
@@ -59,9 +77,10 @@ function int(ρk::AbstractRhok;
     interaction_para = (
         interaction=interaction,
         wingaverage=wingaverage,
+        grid_atol=grid_atol,
         exchange_range=exchange_range,
         pair=pair,
-        pair_hermitian_part=pair_hermitian_part,
+        pair_uplo=pair_uplo,
         pair_range=pair_range,
         pair_atol=pair_atol,
         ρR_buffer_level=ρRbuffer,
@@ -116,7 +135,7 @@ function int(ρk::AbstractRhok;
 
     return nothing
 end
-function int(eps::AbstractDielectric, ρk::AbstractRhok;
+function int(epsilon::DielectricPWBasis, ρk::AbstractRhok;
     ρRnchunk::Integer=Threads.nthreads(), ρRbuffer::Symbol=:auto,
     iqidx=:default, fileformat::Symbol=:jld2,
     outfolder::AbstractString="./", logfile::AbstractString=joinpath(outfolder, "./WannierInterAction.log"),
@@ -124,8 +143,8 @@ function int(eps::AbstractDielectric, ρk::AbstractRhok;
     coulomb::Union{PlaneWaveCoulomb,Nothing}=nothing,
     multipolecorrection::Union{AbstractMultipoleCorrection,Nothing}=nothing,
     wingaverage::Bool=true,
-    exchange_range=(3, 3, 3),
-    pair=:default, pair_hermitian_part=:all, pair_range=:default, pair_atol::Real=1e-6,
+    grid_atol::Real=1e-6, exchange_range=(3, 3, 3),
+    pair=:default, pair_uplo=:all, pair_range=:default, pair_atol::Real=sqrt(eps(Float64)),
 )
 
     mkpath(dirname(logfile))
@@ -152,9 +171,10 @@ function int(eps::AbstractDielectric, ρk::AbstractRhok;
     interaction_para = (
         interaction=interaction,
         wingaverage=wingaverage,
+        grid_atol=grid_atol,
         exchange_range=exchange_range,
         pair=pair,
-        pair_hermitian_part=pair_hermitian_part,
+        pair_uplo=pair_uplo,
         pair_range=pair_range,
         pair_atol=pair_atol,
         ρR_buffer_level=ρRbuffer,
@@ -197,7 +217,7 @@ function int(eps::AbstractDielectric, ρk::AbstractRhok;
     println("multipole correction: ", string(nameof(typeof(multipolecorrection))))
     flush(stdout)
 
-    int(Val(np), eps, ρk, iqidx; coulomb, multipolecorrection, outfolder, fileformat, interaction_para)
+    int(Val(np), epsilon, ρk, iqidx; coulomb, multipolecorrection, outfolder, fileformat, interaction_para)
 
     println("[calculate interaction end]")
 
