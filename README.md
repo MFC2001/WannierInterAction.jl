@@ -7,10 +7,10 @@ A Julia package for evaluating the Coulomb interaction between Wannier pairs
 and for applying mirror corrections to the long-range part of that interaction,
 which would otherwise contain the contributions of all periodic images:
 $$
-F_{p_1\bm{R}_1,p_2\bm{R}_2}
-= \iint \mathrm{d}\bm{r}_1 \mathrm{d}\bm{r}_2
-\psi^{*}_{i_{p_1}\bm{R}_1}(\bm{r}_1) \psi^{*}_{j_{p_2}\bm{R}_2+\bm{R}_{p_2}}(\bm{r}_2)
-F(\bm{r}_1,\bm{r}_2) \psi^{}_{j_{p_1}\bm{R}_1+\bm{R}_{p_1}}(\bm{r}_1) \psi_{i_{p_2}\bm{R}_2}(\bm{r}_2)
+F_{p_1\boldsymbol{R}_1,p_2\boldsymbol{R}_2}
+= \iint \mathrm{d}\boldsymbol{r}_1 \mathrm{d}\boldsymbol{r}_2
+\psi^{*}_{i_{p_1}\boldsymbol{R}_1}(\boldsymbol{r}_1) \psi^{*}_{j_{p_2}\boldsymbol{R}_2+\boldsymbol{R}_{p_2}}(\boldsymbol{r}_2)
+F(\boldsymbol{r}_1,\boldsymbol{r}_2) \psi_{j_{p_1}\boldsymbol{R}_1+\boldsymbol{R}_{p_1}}(\boldsymbol{r}_1) \psi_{i_{p_2}\boldsymbol{R}_2}(\boldsymbol{r}_2)
 $$
 where $F$ is either the bare or the screened Coulomb interaction.
 Currently only **3D** and **2D** systems are supported.
