@@ -53,7 +53,7 @@ a dielectric matrix are available.
 ```julia
 using WannierInterAction
 
-period = [1, 1, 1]                              # use [1, 1, 0] for a 2D slab
+period = [1, 1, 1]                              # 1 represent periodic direction, so two 1 with one 0 for a 2D slab system.
 cell = read("./POSCAR", POSCAR; period)
 atom_orb_index = [[1, 2], [3], [4]]              # Wannier orbitals on each atom (`Int[]` if none)
 pair = atom2orbpair(cell, 4.0, atom_orb_index)   # all pairs within 4 Å
