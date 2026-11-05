@@ -37,6 +37,8 @@ include("./wieps/wieps.jl")
     Truncation threshold for the final computed inter-pair interactions. Values below this threshold are discarded and are not saved.
 - `coulomb`
     Truncated coulomb potential in plane-wave basis, no need to set up for 3D and 2D system, and have to set up for 1D and 0D system.
+- `outfolder`::AbstractString = "./"
+    Directory for saving results in JLD2 format. Files are suffixed with either `bare` or an integer, representing results at different frequency points and matching the frequency points of the dielectric function one-to-one.
 
 See also [`Rhok`](@ref), [`PlaneWaveCoulomb`](@ref).
 """
