@@ -1,6 +1,6 @@
 """
 	build_Glist_rho(qgrid, fft_grid, rldot; normcutrho::Real = -1) -> (Glist_rho, Gidx_rho)
-	build_Glist_rho(eps::AbstractDielectric, fft_grid, rldot; normcutrho::Real = -1) -> (Glist_rho, Gidx_rho, Gidx_rho_negq0)
+	build_Glist_rho(eps::DielectricPWBasis, fft_grid, rldot; normcutrho::Real = -1) -> (Glist_rho, Gidx_rho, Gidx_rho_negq0)
 
 Get a proper Glist and Gidx for ρ at each q.
 Glist_supp contains G which has at least one norm of q+G less than normcutrho and which isn't in eps.Glist.
@@ -8,7 +8,7 @@ Glist_rho = [eps.Glist; Glist_supp].
 Gidx_rho is a Vector{Vector{Int}} which gives the Gidx for each q, note that Gidx_rho[iq][1:eps.nGidx[iq]] == eps.Gidx[iq]
 """
 #这个函数中不能使用多线程循环，会导致得到存在随机性的Gidx
-function build_Glist_rho(eps::AbstractDielectric, fft_grid, rldot; normcutrho::Real = -1)
+function build_Glist_rho(eps::DielectricPWBasis, fft_grid, rldot; normcutrho::Real = -1)
 
 	qgrid = eps.qgrid
 

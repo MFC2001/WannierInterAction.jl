@@ -1,17 +1,17 @@
+"""
+	WannierInterAction
+
+A Julia package used to evaluate the interaction between Wannier pairs and do the mirror correction.
+See also [`Rhok`](@ref), [`int`](@ref) and [`MirrorCorrection`](@ref).
+"""
 module WannierInterAction
 
 using WannierInterActionBase
 
-using WannierInterActionBase.SpecialFunctions
-
 using WannierInterActionBase.StaticArrays
 using WannierInterActionBase.StructEquality
 
-using WannierInterActionBase.QuadGK
-using WannierInterActionBase.HCubature
-
 using WannierInterActionBase.JLD2
-using WannierInterActionBase.DelimitedFiles
 
 Base_exports = names(WannierInterActionBase; all = false)
 for sym in Base_exports
@@ -24,17 +24,20 @@ using Dates: Dates
 using Logging
 using LoggingExtras
 
+# optimization
+using Optim
 
-#fft
+# fft
 using AbstractFFTs
 using FFTW
 
-#interpolation
+# interpolation
 using Interpolations
 
 include("./wannier/wannier.jl")
 include("./Rho/Rho.jl")
 include("./Coulomb/Coulomb.jl")
 include("./int/int.jl")
+include("./MirrorCorrection/MirrorCorrection.jl")
 
 end

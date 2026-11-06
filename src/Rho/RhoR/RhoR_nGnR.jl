@@ -70,10 +70,10 @@ function RhoR_nGnR(ρk::AbstractRhok{RhoT},
 
 	# ρR buffer
 	ρR_size = format_memory(sizeof(RhoT) * nG_rho_max * nR * nchunk)
-	println("ρR: $RhoT, dims=($nG_rho_max, $nR), nchunk=$nchunk, total=$ρR_size")
+	println("ρR_buffer: $RhoT, dims=($nG_rho_max, $nR), nchunk=$nchunk, total=$ρR_size")
 	# ρk buffer
 	ρk_size = format_memory(sizeof(RhoT) * nG_rho_max * nchunk)
-	println("ρk: $RhoT, len=$nG_rho_max, nchunk=$nchunk, total=$ρk_size")
+	println("ρk_buffer: $RhoT, len=$nG_rho_max, nchunk=$nchunk, total=$ρk_size")
 	# Wave functions (ψk & ψkq)
 	wave_size = format_memory(sizeof(RhoT) * prod(fft_grid))
 	total_size = format_memory(sizeof(RhoT) * prod(fft_grid) * nchunk * 2)

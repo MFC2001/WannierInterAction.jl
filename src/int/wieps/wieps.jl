@@ -3,7 +3,7 @@ include("./_witrunc.jl")
 include("./_wotrunc.jl")
 include("./wing.jl")
 
-function int(::Val{3}, eps::AbstractDielectric, ρk::AbstractRhok{RhoT}, iqidx::Vector{Int};
+function int(::Val{3}, eps::DielectricPWBasis, ρk::AbstractRhok{RhoT}, iqidx::Vector{Int};
 	coulomb::PlaneWaveCoulomb,
 	multipolecorrection::Union{AbstractMultipoleCorrection, Nothing} = nothing,
 	outfolder::AbstractString = "./", fileformat::Symbol = :jld2,
@@ -47,7 +47,7 @@ function int(::Val{3}, eps::AbstractDielectric, ρk::AbstractRhok{RhoT}, iqidx::
 
 	return nothing
 end
-function int(::Union{Val{2}, Val{1}}, eps::AbstractDielectric, ρk::AbstractRhok{RhoT}, iqidx::Vector{Int};
+function int(::Union{Val{2}, Val{1}}, eps::DielectricPWBasis, ρk::AbstractRhok{RhoT}, iqidx::Vector{Int};
 	coulomb::PlaneWaveCoulomb,
 	multipolecorrection::Nothing = nothing,
 	outfolder::AbstractString = "./", fileformat::Symbol = :jld2,
