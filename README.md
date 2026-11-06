@@ -118,9 +118,14 @@ interaction with the periodic tail removed only); the `_optim` variants addition
 the fitted parameters. Afterwards, `prune` and `filter_pair` can be used to drop negligible
 entries or to restrict the interaction to a smaller set of pairs.
 
-Note: If the k-grid used in the calculation is too small, the direct interaction may not converge to its theoretical behavior. 
-This can cause the mirror correction to take an excessively long time and the resulting `Ushort` not to decay to zero. 
+Note: If the k-grid used in the calculation is too small, the direct interaction may not converge to its theoretical behavior.
+This can cause the mirror correction to take an excessively long time and the resulting `Ushort` not to decay to zero.
 Users can find more details in `MirrorCorrection.log`, which is stored by default in the same directory as the specified output file.
+
+In addition, the only effective Coulomb potential currently used for 2D systems is `keldysh_gauss`,
+which is derived from a zero-thickness continuous dielectric model. Therefore, the 2D mirror
+correction with keldysh_gauss is only suitable for sufficiently thin 2D materials. If the material
+is not thin enough, a larger k-grid may be required to compensate for this effect.
 
 ### Examples
 
