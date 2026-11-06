@@ -118,6 +118,10 @@ interaction with the periodic tail removed only); the `_optim` variants addition
 the fitted parameters. Afterwards, `prune` and `filter_pair` can be used to drop negligible
 entries or to restrict the interaction to a smaller set of pairs.
 
+Note: If the k-grid used in the calculation is too small, the direct interaction may not converge to its theoretical behavior. 
+This can cause the mirror correction to take an excessively long time and the resulting `Ushort` not to decay to zero. 
+Users can find more details in `MirrorCorrection.log`, which is stored by default in the same directory as the specified output file.
+
 ### Examples
 
 | Template | System | Highlights |
