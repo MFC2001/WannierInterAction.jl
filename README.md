@@ -23,7 +23,7 @@ to construct the Bethe–Salpeter equation (BSE) Hamiltonian and obtain excitoni
 
 ## Installation
 
-The package requires Julia 1.9 or later and can be installed with the Julia package manager.
+The package requires Julia 1.10 or later and can be installed with the Julia package manager.
 From [the Julia REPL](https://docs.julialang.org/en/v1/stdlib/REPL/), press `]` to enter
 the [Pkg mode](https://docs.julialang.org/en/v1/stdlib/REPL/#Pkg-mode) and run:
 

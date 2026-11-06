@@ -74,13 +74,11 @@ function Rhok(wave::WannierPWKgrid;
         normcutwave = sqrt(maximum(G -> G ⋅ (rldot * G), wave.Glist))
         normcutrho = ceil(2 * normcutwave; digits=1)
     end
-    println("normcutrho: ", normcutrho)
 
     qgrid = RedKgrid(MonkhorstPack(wave.kgrid.kgrid_size))
     Glist_rho, Gidx_rho = build_Glist_rho(qgrid, fft_grid, rldot; normcutrho)
 
-    println("nGlist_rho = ", length(Glist_rho))
-    println("nG_max_rho = ", maximum(length.(Gidx_rho)))
+    @info "Rhok calculation parameters" normcutrho=normcutrho nGlist_rho=length(Glist_rho) nG_max_rho=maximum(length.(Gidx_rho))
 
     if wave.nspinor == 1
         return Rhok_wospin(wave, qgrid, Gidx_rho, Glist_rho; fft_grid)
@@ -112,12 +110,10 @@ function Rhok(eps::DielectricPWBasis, wave::WannierPWKgrid;
         normcutwave = sqrt(maximum(G -> G ⋅ (rldot * G), wave.Glist))
         normcutrho = ceil(2 * normcutwave; digits=1)
     end
-    println("normcutrho: ", normcutrho)
 
     Glist_rho, Gidx_rho = build_Glist_rho(eps, fft_grid, rldot; normcutrho)
 
-    println("nGlist_rho = ", length(Glist_rho))
-    println("nG_max_rho = ", maximum(length.(Gidx_rho)))
+    @info "Rhok calculation parameters" normcutrho=normcutrho nGlist_rho=length(Glist_rho) nG_max_rho=maximum(length.(Gidx_rho))
 
     if wave.nspinor == 1
         return Rhok_wospin(wave, eps.qgrid, Gidx_rho, Glist_rho; fft_grid)
@@ -170,13 +166,11 @@ function Rhok(wave_up::WannierPWKgrid, wave_dn::WannierPWKgrid;
         normcutwave = sqrt(maximum(G -> G ⋅ (rldot * G), wave_up.Glist))
         normcutrho = ceil(2 * normcutwave; digits=1)
     end
-    println("normcutrho: ", normcutrho)
 
     qgrid = RedKgrid(MonkhorstPack(wave_up.kgrid.kgrid_size))
     Glist_rho, Gidx_rho = build_Glist_rho(qgrid, fft_grid, rldot; normcutrho)
 
-    println("nGlist_rho = ", length(Glist_rho))
-    println("nG_max_rho = ", maximum(length.(Gidx_rho)))
+    @info "Rhok calculation parameters" normcutrho=normcutrho nGlist_rho=length(Glist_rho) nG_max_rho=maximum(length.(Gidx_rho))
 
     return Rhok_collinear(wave_up, wave_dn, qgrid, Gidx_rho, Glist_rho; fft_grid)
 end
@@ -195,12 +189,10 @@ function Rhok(eps::DielectricPWBasis, wave_up::WannierPWKgrid, wave_dn::WannierP
         normcutwave = sqrt(maximum(G -> G ⋅ (rldot * G), wave_up.Glist))
         normcutrho = ceil(2 * normcutwave; digits=1)
     end
-    println("normcutrho: ", normcutrho)
 
     Glist_rho, Gidx_rho = build_Glist_rho(eps, fft_grid, rldot; normcutrho)
 
-    println("nGlist_rho = ", length(Glist_rho))
-    println("nG_max_rho = ", maximum(length.(Gidx_rho)))
+    @info "Rhok calculation parameters" normcutrho=normcutrho nGlist_rho=length(Glist_rho) nG_max_rho=maximum(length.(Gidx_rho))
 
     return Rhok_collinear(wave_up, wave_dn, eps.qgrid, Gidx_rho, Glist_rho; fft_grid)
 end

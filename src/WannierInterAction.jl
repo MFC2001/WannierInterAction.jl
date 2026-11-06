@@ -6,17 +6,12 @@ See also [`Rhok`](@ref), [`int`](@ref) and [`MirrorCorrection`](@ref).
 """
 module WannierInterAction
 
-using WannierInterActionBase
+using Reexport
+@reexport using WannierInterActionBase
 
 using WannierInterActionBase.StaticArrays
 using WannierInterActionBase.StructEquality
-
 using WannierInterActionBase.JLD2
-
-Base_exports = names(WannierInterActionBase; all = false)
-for sym in Base_exports
-	@eval export $sym
-end
 
 using LinearAlgebra
 using Printf

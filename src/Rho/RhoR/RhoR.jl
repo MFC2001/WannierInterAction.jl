@@ -112,6 +112,9 @@ function RhoR(ρk::AbstractRhok{RhoT},
 			ρRbuffer = :medium
 		elseif free_mem > low_mem + 1024^2 * 512
 			ρRbuffer = :low
+		else
+			println("There is a possibility of memory overflow.")
+			ρRbuffer = :low
 		end
 	end
 

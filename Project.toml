@@ -13,6 +13,7 @@ Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 LoggingExtras = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 WannierInterActionBase = "30f46834-f0b0-4c0a-9db1-a1e95031f2fb"
 
 [compat]
@@ -21,11 +22,6 @@ FFTW = "1"
 Interpolations = "0.16"
 LoggingExtras = "1"
 Optim = "2"
+Reexport = "1"
 WannierInterActionBase = "0.3"
 julia = "1.10"
-
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]
