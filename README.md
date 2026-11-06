@@ -1,6 +1,7 @@
 # WannierInterAction
 
 [![Build Status](https://github.com/MFC2001/WannierInterAction.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/MFC2001/WannierInterAction.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![codecov](https://codecov.io/github/MFC2001/WannierInterAction.jl/graph/badge.svg?token=BW8CIEPMQM)](https://codecov.io/github/MFC2001/WannierInterAction.jl)
 
 A Julia package for evaluating the Coulomb interaction between Wannier pairs
 (ordered pairs of Wannier functions) in a plane-wave basis,
