@@ -25,7 +25,18 @@ using WannierInterAction
     ]
     ρk = Rhok(wave)
     mktempdir() do tmp_dir
-        int(ρk; pair, outfolder=tmp_dir)
+        int(ρk; ρRbuffer=:low, pair, outfolder=tmp_dir)
+        @test isfile(joinpath(tmp_dir, "U_bare.jld2"))
+        @test isfile(joinpath(tmp_dir, "pair_bare.jld2"))
+        int(ρk; ρRbuffer=:high, pair, outfolder=tmp_dir)
+        int(ρk; ρRbuffer=:medium, pair, outfolder=tmp_dir)
+    end
+
+    wave = WannierPWKgrid(kgrid, components, Gidx, Glist, lattice;
+        nspinor=1, fft_grid=[4, 4, 4], period=[1, 1, 1])
+    ρk = Rhok(wave)
+    mktempdir() do tmp_dir
+        int(ρk; ρRbuffer=:low, pair, outfolder=tmp_dir)
         @test isfile(joinpath(tmp_dir, "U_bare.jld2"))
         @test isfile(joinpath(tmp_dir, "pair_bare.jld2"))
     end
