@@ -37,7 +37,7 @@ or, equivalently, via [`Pkg.jl`](https://pkgdocs.julialang.org/v1/):
 julia> import Pkg; Pkg.add("WannierInterAction")
 ```
 
-## Start
+## Quick start
 
 Entering `?WannierInterAction` in the Julia REPL prints the built-in documentation;
 the same help is available for every exported function (for example `?Rhok`, `?int`
