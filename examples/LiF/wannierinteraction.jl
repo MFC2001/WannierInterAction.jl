@@ -9,6 +9,7 @@ atom_orb_index = [
     Int[], [1], [2], [3], [4], [5], [6],
     [7, 8, 9],
 ]
+# contruct a set of Wannier pairs with intra-pair distance less than 4
 pair = atom2orbpair(cell, 4, atom_orb_index)
 
 #2. We calculate interaction between wannier basis under plane-wave basis.

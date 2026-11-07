@@ -9,7 +9,7 @@ period = [1, 1, 0]
 cell = read("./POSCAR", POSCAR; period)
 # C1:pz; C2:pz.
 atom_orb_index = [[1], [2]]
-# n:1.42; nn:2.46; nnn:2.84; nnnn:4.26
+# contruct a set of Wannier pairs with intra-pair distance less than 3
 pair = atom2orbpair(cell, 3, atom_orb_index)
 
 chkdata = read("./wannier/wannier90.chk", wannier90_chk)

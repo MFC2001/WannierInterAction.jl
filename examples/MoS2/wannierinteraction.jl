@@ -12,7 +12,7 @@ atom_orb_index = [
     collect(11:16),
     collect(17:22),
 ]
-#n: 2.41425; nn:3.186; nnn:3.9974; nnnn:5.11173;
+# contruct a set of Wannier pairs with intra-pair distance less than 2.5
 pair = atom2orbpair(cell, 2.5, atom_orb_index)
 
 chkdata = read("./wannier/wannier90.chk", wannier90_chk)

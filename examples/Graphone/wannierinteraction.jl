@@ -8,7 +8,7 @@ cell = read("./POSCAR", POSCAR; period)
 orbital_cell = Cell(cell.lattice, [[2/3, 1/3, 1/2]], "R"; name=["C"], period)
 # 1:up, 2:dn.
 atom_orb_index = [[1, 2]]
-# shell:2.54, 4.4, 5.07, 6.7, 7.6, 8.8, 9.1, 10.1
+# contruct a set of Wannier pairs with intra-pair distance less than 10.5
 pair = atom2orbpair(orbital_cell, 10.5, atom_orb_index)
 
 intfolder = "./interaction"
