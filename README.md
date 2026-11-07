@@ -66,11 +66,11 @@ that separates them.
 ### 2. Load the wavefunctions and the dielectric function
 
 ```julia
-chkdata = read("./wannier/wannier90.chk", wannier90_chk)   # wannierberri_chk for `*.chk.npz`
+chkdata = read("./wannier/wannier90.chk", wannier90_chk)   # wannierberri_chk for `w90data.chk.npz` from wannierberri
 wave_ik = read("./wannier/pwscf.save", chkdata, QE_wannier; period)
 
-# Only needed for screened interactions; `epsmat_bgw` also reads `vcoul`,
-# so set `write_vcoul` in `epsilon.inp`. `epsmat_yambo` is supported as well.
+# Only needed for screened interactions; `epsmat_bgw` also reads `vcoul`, so set `write_vcoul` in `epsilon.inp`.
+# `epsmat_yambo` is supported as well.
 eps = read("./epsilon/epsmat.h5", epsmat_bgw)
 ```
 
@@ -132,6 +132,6 @@ is not thin enough, a larger k-grid may be required to compensate for this effec
 | Template | System | Highlights |
 | --- | --- | --- |
 | [`examples/LiF`](examples/LiF) | 3D bulk | full workflow with BerkeleyGW screening and `:gauss_optim`; `wannierberri` preprocessing (`pre.py`); reuse of fitted parameters; commented `prune`/`filter_pair` examples |
-| [`examples/MoS2`](examples/MoS2) | 2D slab, spinor Wannier functions | noncollinear spin treatment (`upindex`/`dnindex`), `:keldysh_gauss_optim`, `r₀_optim=true`, `pair_uplo=:U` |
+| [`examples/MoS2`](examples/MoS2) | 2D slab, spinor wavefunctions | noncollinear spin treatment (`upindex`/`dnindex`), `:keldysh_gauss_optim`, `r₀_optim=true`, `pair_uplo=:U` |
 | [`examples/Graphene`](examples/Graphene) | 2D, bare interaction | interaction without screening (`Rhok(wave_ik)`, `int(ρk; ...)`) |
 | [`examples/Graphone`](examples/Graphone) | 2D, spin-polarized | separate spin channels, Yambo dielectric function, explicit `PlaneWaveCoulomb(:slab, ρk)`, real-space Wannier plots via `realspace`/`wannier90_xsf` |

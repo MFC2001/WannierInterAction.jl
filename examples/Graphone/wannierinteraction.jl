@@ -45,9 +45,9 @@ rcut = 10 * 3 / 2
 
 # Do mirror correction for bare direct interaction.
 U_bare = load(joinpath(intfolder, "U_bare.jld2"))
-U_bare_mirror = MirrorCorrection(:keldysh_gauss_optim, U_bare["interaction"], kgrid, lattice, orblocat; period=cell.period,
+MirrorCorrection(:keldysh_gauss_optim, U_bare["interaction"], kgrid, lattice, orblocat; period=cell.period,
     rcut, outfile=joinpath(intfolder, "U_bare_mirror.jld2"))
 
 U_1 = load(joinpath(intfolder, "U_1.jld2"))
-U_1_mirror = MirrorCorrection(:keldysh_gauss, U_1["interaction"], kgrid, lattice, orblocat; period=cell.period,
+MirrorCorrection(:keldysh_gauss_optim, U_1["interaction"], kgrid, lattice, orblocat; period=cell.period,
     rcut, r₀_optim=true, outfile=joinpath(intfolder, "U_1_mirror.jld2"))

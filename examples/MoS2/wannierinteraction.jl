@@ -32,9 +32,9 @@ rcut = (nk - 1) * h / 2 - 1
 
 outfolder = intfolder
 U_bare = load(joinpath(intfolder, "U_bare.jld2"))
-U_bare_mirror = MirrorCorrection(:keldysh_gauss_optim, U_bare["interaction"], kgrid, lattice, orblocat; period,
+MirrorCorrection(:keldysh_gauss_optim, U_bare["interaction"], kgrid, lattice, orblocat; period,
     rcut, outfile=joinpath(outfolder, "U_bare_mirror.jld2"))
 
 U_1 = load(joinpath(intfolder, "U_1.jld2"))
-MirrorCorrection(:keldysh_gauss, U_1["interaction"], kgrid, lattice, orblocat; period,
+MirrorCorrection(:keldysh_gauss_optim, U_1["interaction"], kgrid, lattice, orblocat; period,
     rcut, r₀_optim=true, outfile=joinpath(outfolder, "U_1_mirror.jld2"))
