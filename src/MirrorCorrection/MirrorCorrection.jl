@@ -7,10 +7,8 @@ include("./KeldyshGauss.jl")
 #TODO: 或许需要带着相位因子展开。
 
 """
-	MirrorCorrection(sym::Symbol, U::AbstractHR, kgrid, lattice, orblocat;
-		outfile::Union{Nothing,AbstractString}=nothing,
-		logfile::AbstractString=isnothing(outfile) ? "./MirrorCorrection.log" :
-			joinpath(dirname(outfile), "MirrorCorrection.log"),
+	MirrorCorrection(sym::Symbol, U::AbstractHR, kgrid, lattice, orblocat; outfile::Union{Nothing,AbstractString}=nothing,
+		logfile::AbstractString=isnothing(outfile) ? "./MirrorCorrection.log" : joinpath(dirname(outfile), "MirrorCorrection.log"),
 		kwargs...)
 
 Apply a mirror correction to the direct interaction `U`.
@@ -52,8 +50,8 @@ non-periodic direction for 2D (slab) systems.
 - `outfile::Union{Nothing,AbstractString}=nothing`: Path of a JLD2 file in which the
   returned `NamedTuple` is saved; nothing is written if `nothing`.
 - `logfile::AbstractString`: Path of the log file, defaulting to `MirrorCorrection.log`
-  next to `outfile` (or in the current directory if `outfile` is `nothing`). During the
-  computation `stdout` is redirected to it.
+  next to `outfile` (or in the current directory if `outfile` is `nothing`),
+  it can be inspected during the run to track which tasks have completed and to estimate the time remaining.
 
 !!! note
 	Other method-specific keyword arguments are not documented here; see `/examples` for

@@ -1,13 +1,28 @@
 """
-	realspace(wave::WannierPWKgrid{WT}; range = :default, fft_grid = wave.fft_grid, cell::Union{Cell, Nothing} = nothing)
+    realspace(wave::WannierPWKgrid{WT}; range = :default, fft_grid = wave.fft_grid, cell::Union{Cell, Nothing} = nothing)
 
-If the `cell` keyword argument is provided (as a [`Cell`](@ref)), 
-the function returns a vector of [`wannier90_xsf`](@ref) objects; 
-otherwise, it returns a vector of arrays. 
-The length of the vector equals the number of Wannier functions. 
-If `wave` is a spinor, the result is a matrix whose first dimension has size 2 (spin).
+Compute the real-space representation of the Wannier functions contained in `wave` via an inverse FFT.
+
+# Arguments
+- `wave::WannierPWKgrid{WT}`: The object containing the Wannier functions to be transformed into real space.
+
+# Keywords
+- `range = :default`: The real-space range over which the Wannier functions are evaluated.
+  A tuple `(n1, n2, n3)` corresponds to the ranges along the three directions; 
+  for example, `(3, 3, 1)` maps to `(-1:1, -1:1, 0)`. With the default
+  `:default`, the range follows the periodicity specified by `wave.period`: periodic
+  directions use `-1:1`, while non-periodic directions are fixed to `0`.
+- `fft_grid = wave.fft_grid`: The grid density, i.e. the number of grid points per unit cell used for the FFT.
+- `cell::Union{Cell, Nothing} = nothing`: 
+  If provided (as a [`Cell`](@ref)), the function returns a vector of [`wannier90_xsf`](@ref) objects; 
+  otherwise, it returns a vector of arrays.
+
+# Returns
+A vector whose length equals the number of Wannier functions. 
+Each element is an array, or a [`wannier90_xsf`](@ref) object when `cell` is provided. 
+If `wave` is a spinor, the result is instead a matrix whose first dimension has size 2 (the spin degree of freedom).
 """
-function realspace(wave::WannierPWKgrid{WT}; kwargs...) where {WT<:Number}
+function WannierInterActionBase.realspace(wave::WannierPWKgrid{WT}; kwargs...) where {WT<:Number}
     if wave.nspinor == 2
         return realspace_spinor(wave; kwargs...)
     else

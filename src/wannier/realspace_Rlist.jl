@@ -1,4 +1,24 @@
-function realspace(wave::WannierPWKgrid{WT}, Rlist::AbstractVector; kwargs...) where {WT<:Number}
+"""
+    realspace(wave::WannierPWKgrid{WT}, Rlist::AbstractVector; fft_grid = wave.fft_grid)
+
+Compute the real-space representation of the Wannier functions contained in `wave` via an inverse FFT, 
+evaluated at the lattice cells specified by `Rlist`.
+
+# Arguments
+- `wave::WannierPWKgrid{WT}`: The object containing the Wannier functions to be transformed into real space.
+- `Rlist::AbstractVector`: The lattice cells over which the Wannier functions are evaluated.
+  Each element must be a three-integer vector `[n1, n2, n3]` specifying the cell reached by the corresponding lattice vector.
+
+# Keywords
+- `fft_grid = wave.fft_grid`: The grid density, i.e. the number of grid points per unit cell used for the FFT.
+
+# Returns
+- For scalar Wannier functions: a vector of length `nw` (the number of Wannier functions).
+  Each element is an array of size `[nfx, nfy, nfz, nR]`, where the last dimension is indexed consistently with `Rlist`.
+- For spinor Wannier functions: a `[2, nw]` matrix, where the first dimension is the spin degree of freedom. 
+  Each element is an array of size `[nfx, nfy, nfz, nR]`, with the last dimension indexed consistently with `Rlist`.
+"""
+function WannierInterActionBase.realspace(wave::WannierPWKgrid{WT}, Rlist::AbstractVector; kwargs...) where {WT<:Number}
     Rlist = collect(ReducedCoordinates{Int}, Rlist)
     if wave.nspinor == 2
         return realspace_spinor(wave, Rlist; kwargs...)

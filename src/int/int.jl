@@ -29,6 +29,9 @@ include("./wieps/wieps.jl")
     int(ρk::AbstractRhok; kwargs...)
     int(epsilon::DielectricPWBasis, ρk::AbstractRhok; kwargs...)
 
+Evaluate coulomb interaction in Wannier basis, with or without screening.
+Only support 3D and 2D system at present.
+
 - `pair`::Tuple{<:Integer,<:Integer,<:AbstractVector{<:Integer}}
     A tuple `(i, j, R)` representing a pair formed by the Wannier basis at `i0` and the Wannier basis at `jR`.
 - `pair_uplo`::Symbol = :all
@@ -39,6 +42,9 @@ include("./wieps/wieps.jl")
     Truncated coulomb potential in plane-wave basis, no need to set up for 3D and 2D system, and have to set up for 1D and 0D system.
 - `outfolder`::AbstractString = "./"
     Directory for saving results in JLD2 format. Files are suffixed with either `bare` or an integer, representing results at different frequency points and matching the frequency points of the dielectric function one-to-one.
+
+A log file named `WannierInterAction.log` is written to `outfolder`; 
+it can be inspected during the run to track which tasks have completed and to estimate the time remaining.
 
 See also [`Rhok`](@ref), [`PlaneWaveCoulomb`](@ref).
 """

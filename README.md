@@ -89,6 +89,9 @@ k-grid of the wavefunctions and that of the dielectric function must have the sa
 The calculation is threaded, so start Julia with `julia -t auto` (or set
 `JULIA_NUM_THREADS`).
 
+Note: A log file named `WannierInterAction.log` is written to `outfolder`; 
+it can be inspected during the run to track which tasks have completed and to estimate the time remaining.
+
 ### 4. Apply the mirror correction
 
 ```julia
